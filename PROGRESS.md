@@ -11,7 +11,8 @@ Project: Adaptive Virtual Loss for Lock-Free Parallel MCTS (our adaptive formula
 - Step 1 (built; test-connect4 PASS, 0 rule mismatches): Game interface (game.hpp), Connect-4 bitboard (connect4.hpp), per-thread RNG (rng.hpp), stats / run-info / CSV helpers, test_connect4.cpp.
 
 ## Next
-- Step 2: teach MCTS, build V0 sequential UCT.
+- Step 2 (code written, waiting for user to build and run `make test-uct`): V0 sequential UCT (uct_v0.hpp), arena.hpp, test_uct.cpp (tactics, V0 vs random, first speed table).
+- Step 3: V1 leaf parallel + V2 root parallel.
 
 ## Results so far
 - hello_threads, 4 runs (400M steps): 1 thread ~373-380 ms; 2 threads speedup 1.96-2.01; 4 threads 3.84-3.92; 8 threads 5.62-6.67 (noisy: depends on which cores the OS picks on this hybrid CPU).
