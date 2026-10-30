@@ -1,2 +1,5 @@
 timestamp,git_commit,cpu_model,logical_cpus,ram_mb,compiler,game,games,seed,threads,p1_wins,p2_wins,draws,p1_win_rate,p1_ci95_halfwidth,mean_moves,min_moves,max_moves,rule_mismatches
 2026-10-30T15:15:22,26e8427-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,connect4_6x7,1000,42,1,563,434,3,0.5630,0.0307,21.207,7,42,0
+2026-10-30T15:23:04,704dd15,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,connect4_6x7,1000,42,1,563,434,3,0.5630,0.0307,21.207,7,42,0
+2026-10-30T15:23:06,704dd15,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,connect4_6x7,1000,42,1,563,434,3,0.5630,0.0307,21.207,7,42,0
+2026-10-30T15:23:07,704dd15,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,connect4_6x7,1000,42,1,563,434,3,0.5630,0.0307,21.207,7,42,0
