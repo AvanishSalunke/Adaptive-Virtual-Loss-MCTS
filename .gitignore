@@ -1,0 +1,15 @@
+# compiled output
+build/
+*.o
+*.out
+
+# python
+__pycache__/
+*.pyc
+
+# LaTeX junk (for later)
+*.aux
+*.log
+*.toc
+*.bbl
+*.blg
