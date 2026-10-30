@@ -1,0 +1,2 @@
+timestamp,git_commit,cpu_model,logical_cpus,ram_mb,compiler,game,threads,games_per_repeat,repeats,base_seed,playouts_per_sec_mean,playouts_per_sec_std,mean_moves_per_game
+2026-10-30T15:15:22,26e8427-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,connect4_6x7,1,100000,5,1000,6003053,407278,21.314

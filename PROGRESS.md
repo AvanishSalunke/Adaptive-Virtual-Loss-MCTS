@@ -7,14 +7,15 @@ Project: Adaptive Virtual Loss for Lock-Free Parallel MCTS (our adaptive formula
 - Hybrid CPU (P-cores, E-cores, low-power E-cores): threads are not all equal. See notes below.
 
 ## Done
-- Step 0 (files written, waiting for user to build and run): folder layout, Makefile, timing helper, hello_threads.
+- Step 0: folder layout, Makefile, timing helper, hello_threads. Built and run in WSL2 (project linked as ~/mcts).
+- Step 1 (files written, waiting for user to build and run): Game interface (game.hpp), Connect-4 bitboard (connect4.hpp), per-thread RNG (rng.hpp), stats / run-info / CSV helpers, test_connect4.cpp.
 
 ## Next
-- Step 0: user installs WSL2 + g++, builds and runs `make run-hello`, pastes output.
-- Step 1: Connect-4 engine + Game interface, 1000 random games.
+- Step 1: user runs `make clean && make` then `make test-connect4`, pastes output.
+- Step 2: teach MCTS, build V0 sequential UCT.
 
 ## Results so far
-- None yet.
+- hello_threads, 4 runs (400M steps): 1 thread ~373-380 ms; 2 threads speedup 1.96-2.01; 4 threads 3.84-3.92; 8 threads 5.62-6.67 (noisy: depends on which cores the OS picks on this hybrid CPU).
 
 ## Notes
 - User runs all builds/commands and pastes output; Claude edits code and gives instructions.

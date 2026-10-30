@@ -6,14 +6,16 @@ CXX      := g++
 CXXFLAGS := -O2 -std=c++17 -fopenmp -pthread -Wall -Wextra
 SRC_DIR  := src
 BUILD_DIR := build
+HEADERS  := $(wildcard $(SRC_DIR)/*.hpp)
 
-all: $(BUILD_DIR)/hello_threads
+all: $(BUILD_DIR)/hello_threads $(BUILD_DIR)/test_connect4
 
-# Demo program: starts OpenMP threads and times a fixed workload.
+# Pattern rule: build/<name> is compiled from src/<name>.cpp, and a change to
+# any header rebuilds it.
 # $< is the first prerequisite (the .cpp), $@ is the target (the binary).
 # "| $(BUILD_DIR)" is an order-only prerequisite: the directory must exist,
 # but its timestamp does not trigger a rebuild.
-$(BUILD_DIR)/hello_threads: $(SRC_DIR)/hello_threads.cpp $(SRC_DIR)/timing.hpp | $(BUILD_DIR)
+$(BUILD_DIR)/%: $(SRC_DIR)/%.cpp $(HEADERS) | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $< -o $@
 
 $(BUILD_DIR):
@@ -22,7 +24,10 @@ $(BUILD_DIR):
 run-hello: $(BUILD_DIR)/hello_threads
 	./$(BUILD_DIR)/hello_threads
 
+test-connect4: $(BUILD_DIR)/test_connect4
+	./$(BUILD_DIR)/test_connect4
+
 clean:
 	rm -rf $(BUILD_DIR)
 
-.PHONY: all run-hello clean
+.PHONY: all run-hello test-connect4 clean

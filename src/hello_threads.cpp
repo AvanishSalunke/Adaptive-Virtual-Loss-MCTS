@@ -83,12 +83,12 @@ int main(int argc, char** argv) {
     uint64_t sink = 0;  // we print this at the end so the work can't be optimised away
 
     for (int T : thread_counts) {
-        sink ^= run_once(T, total_iters);  // warm-up: thread start-up, cold caches
+        sink += run_once(T, total_iters);  // warm-up: thread start-up, cold caches
 
         double times[repeats];
         for (int r = 0; r < repeats; ++r) {
             Timer tm;
-            sink ^= run_once(T, total_iters);
+            sink += run_once(T, total_iters);
             times[r] = tm.elapsed_ms();
         }
 
