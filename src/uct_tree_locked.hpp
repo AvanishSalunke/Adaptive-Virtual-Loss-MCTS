@@ -19,8 +19,6 @@
 // same time pick the same child. That repeated work (search overhead) is
 // exactly what the later versions try to reduce.
 #pragma once
-#include <omp.h>
-
 #include <algorithm>
 #include <atomic>
 #include <cmath>
@@ -32,6 +30,7 @@
 #include "game.hpp"
 #include "rng.hpp"
 #include "spinlock.hpp"
+#include "team.hpp"
 #include "timing.hpp"
 #include "uct_v0.hpp"  // for the shared Limit and RootChild types
 
@@ -72,9 +71,8 @@ public:
 
         Timer timer;
         // Every thread runs this block: its own loop of UCT iterations on the shared tree.
-        #pragma omp parallel num_threads(threads_)
-        {
-            ThreadData& td = data_[static_cast<std::size_t>(omp_get_thread_num())];
+        run_team(threads_, [&](int thread_index) {
+            ThreadData& td = data_[static_cast<std::size_t>(thread_index)];
             for (;;) {
                 if (limit.iterations != 0 &&
                     claimed.fetch_add(1, std::memory_order_relaxed) >= limit.iterations)
@@ -86,7 +84,7 @@ public:
                     timer.elapsed_sec() >= limit.seconds)
                     break;
             }
-        }  // implicit barrier: every thread has finished
+        });  // returns when every thread has finished
 
         elapsed_ = timer.elapsed_sec();
         iterations_ = 0;

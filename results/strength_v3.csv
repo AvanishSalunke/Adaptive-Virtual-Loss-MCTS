@@ -1,0 +1,5 @@
+timestamp,git_commit,cpu_model,logical_cpus,ram_mb,compiler,pairing,v3_threads,v3_time_s,v0_time_s,games,wins,draws,losses,win_rate,ci95_low,ci95_high,opening_plies,v3_seed,v0_seed,opening_seed
+2026-11-01T14:05:14,9e28716,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V3 vs V0 (equal time),2,0.100,0.100,20,10,3,7,0.5750,0.3641,0.7617,4,3002,4000,1
+2026-11-01T14:05:14,9e28716,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V3 vs V0 (equal playouts),2,0.100,0.088,20,8,5,7,0.5250,0.3205,0.7215,4,3002,4000,1
+2026-11-01T14:05:14,9e28716,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V3 vs V0 (equal time),4,0.100,0.100,20,10,1,9,0.5250,0.3205,0.7215,4,3004,4000,1
+2026-11-01T14:05:14,9e28716,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V3 vs V0 (equal playouts),4,0.100,0.088,20,12,1,7,0.6250,0.4095,0.8002,4,3004,4000,1

@@ -9,7 +9,8 @@ BUILD_DIR := build
 HEADERS  := $(wildcard $(SRC_DIR)/*.hpp)
 
 all: $(BUILD_DIR)/hello_threads $(BUILD_DIR)/test_connect4 $(BUILD_DIR)/test_uct $(BUILD_DIR)/test_parallel \
-     $(BUILD_DIR)/race_demo $(BUILD_DIR)/test_locked $(BUILD_DIR)/strength_v3
+     $(BUILD_DIR)/race_demo $(BUILD_DIR)/test_locked $(BUILD_DIR)/strength_v3 \
+     $(BUILD_DIR)/test_lockfree
 
 # Pattern rule: build/<name> is compiled from src/<name>.cpp, and a change to
 # any header rebuilds it.
@@ -44,7 +45,20 @@ test-locked: $(BUILD_DIR)/test_locked
 strength-v3: $(BUILD_DIR)/strength_v3
 	./$(BUILD_DIR)/strength_v3 $(ARGS)
 
+test-lockfree: $(BUILD_DIR)/test_lockfree
+	./$(BUILD_DIR)/test_lockfree
+
+# ThreadSanitizer build: std::thread instead of OpenMP, no optimisation tricks.
+$(BUILD_DIR)/tsan_check: $(SRC_DIR)/tsan_check.cpp $(HEADERS) | $(BUILD_DIR)
+	$(CXX) -O1 -g -std=c++17 -pthread -fsanitize=thread -DMCTS_STD_THREADS -Wall -Wextra $< -o $@
+
+tsan: $(BUILD_DIR)/tsan_check
+	./$(BUILD_DIR)/tsan_check
+
+tsan-control: $(BUILD_DIR)/tsan_check
+	./$(BUILD_DIR)/tsan_check control
+
 clean:
 	rm -rf $(BUILD_DIR)
 
-.PHONY: all run-hello test-connect4 test-uct test-parallel race-demo test-locked strength-v3 clean
+.PHONY: all run-hello test-connect4 test-uct test-parallel race-demo test-locked strength-v3 test-lockfree tsan tsan-control clean

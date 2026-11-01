@@ -1,0 +1,10 @@
+timestamp,git_commit,cpu_model,logical_cpus,ram_mb,compiler,method,threads,increments_per_thread,repeats,expected,lost_min,lost_max,time_ms_mean
+2026-11-01T13:57:34,9e28716,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,unprotected,1,200000,5,200000,0,0,0.2
+2026-11-01T13:57:34,9e28716,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,spinlock,1,200000,5,200000,0,0,1.2
+2026-11-01T13:57:34,9e28716,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,atomic,1,200000,5,200000,0,0,0.9
+2026-11-01T13:57:34,9e28716,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,unprotected,4,200000,5,800000,549143,595459,0.1
+2026-11-01T13:57:34,9e28716,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,spinlock,4,200000,5,800000,0,0,51.3
+2026-11-01T13:57:34,9e28716,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,atomic,4,200000,5,800000,0,0,16.0
+2026-11-01T13:57:34,9e28716,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,unprotected,8,200000,5,1600000,406921,822897,3.8
+2026-11-01T13:57:34,9e28716,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,spinlock,8,200000,5,1600000,0,0,186.3
+2026-11-01T13:57:34,9e28716,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,atomic,8,200000,5,1600000,0,0,42.5

@@ -1,0 +1,6 @@
+timestamp,git_commit,cpu_model,logical_cpus,ram_mb,compiler,version,threads,time_per_move_s,repeats,base_seed,playouts_per_sec_mean,playouts_per_sec_std,speedup_vs_1,efficiency,latency_mean_ms,latency_p95_ms,tree_nodes_mean,lost_updates_max,lock_acquires_per_iter,contended_pct,pool_exhausted
+2026-11-01T13:57:41,9e28716,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V0 sequential UCT,1,0.100,10,9000,2075530,62604,1.000,1.000,100.00,100.01,436783,n/a,n/a,n/a,no
+2026-11-01T13:57:41,9e28716,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V3 shared tree + locks,1,0.100,10,9000,1851866,142985,1.000,1.000,100.01,100.02,388175,0,15.971,0.000,no
+2026-11-01T13:57:41,9e28716,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V3 shared tree + locks,2,0.100,10,9000,1798653,205850,0.971,0.486,100.01,100.02,324254,0,15.708,4.552,no
+2026-11-01T13:57:41,9e28716,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V3 shared tree + locks,4,0.100,10,9000,1871772,83052,1.011,0.253,100.03,100.05,343157,0,15.842,14.916,no
+2026-11-01T13:57:41,9e28716,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V3 shared tree + locks,8,0.100,10,9000,1502023,239127,0.811,0.101,100.35,103.08,251674,0,15.115,25.232,no
