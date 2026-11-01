@@ -4,18 +4,33 @@ Project: Adaptive Virtual Loss for Lock-Free Parallel MCTS (our adaptive formula
 
 ## Machine
 - Intel Core Ultra 5 125H, 14 cores / 18 logical processors, 16 GB RAM, Windows 11 + WSL2 (Ubuntu)
-- Hybrid CPU (P-cores, E-cores, low-power E-cores): threads are not all equal. See notes below.
+- Hybrid CPU (P-cores, E-cores, low-power E-cores): threads are not all equal; 8-thread results are noisy.
+
+## Source layout (src/)
+- util/        timing.hpp, rng.hpp, stats.hpp, run_info.hpp, csv_log.hpp
+- parallel/    spinlock.hpp, team.hpp (OpenMP or std::thread launcher)
+- games/       game.hpp (interface), connect4.hpp, arena.hpp (match play)
+- search/      uct_v0.hpp (V0), uct_leaf_parallel.hpp (V1), uct_root_parallel.hpp (V2), uct_tree_locked.hpp (V3), uct_tree_lockfree.hpp (V4, optional virtual loss = V5), virtual_loss.hpp (penalty rule)
+- demos/       hello_threads.cpp, race_demo.cpp
+- tests/       test_connect4, test_uct, test_parallel, test_locked, test_lockfree, test_virtual_loss, tsan_check
+- benchmarks/  strength_v3.cpp
+Headers are found through -I flags in the Makefile, so sources include them by bare name. Results go to results/*.csv.
 
 ## Done
-- Step 0: folder layout, Makefile, timing helper, hello_threads. Built and run in WSL2 (project linked as ~/mcts).
-- Step 1 (built; test-connect4 PASS, 0 rule mismatches): Game interface (game.hpp), Connect-4 bitboard (connect4.hpp), per-thread RNG (rng.hpp), stats / run-info / CSV helpers, test_connect4.cpp.
-- Step 2 (built; test-uct PASS): V0 sequential UCT (uct_v0.hpp), arena.hpp, test_uct.cpp (tactics, V0 vs random, first speed table).
-- Step 3 (built; test-parallel PASS): V1 leaf parallel (uct_leaf_parallel.hpp), V2 root parallel (uct_root_parallel.hpp), test_parallel.cpp.
+- Step 0: setup, timer, hello_threads. WSL2 project linked as ~/mcts.
+- Step 1: Game interface, Connect-4 bitboard, per-thread RNG, helpers (test-connect4 PASS, 0 rule mismatches).
+- Step 2: V0 sequential UCT (test-uct PASS).
+- Step 3: V1 leaf parallel, V2 root parallel (test-parallel PASS).
+- Step 4: V3 shared tree with spin locks, race demo, lock contention, 20-game strength run for T=2,4 (race-demo, test-locked PASS).
+- Step 5: V4 lock-free (exact and racy modes); TSan: control reported the planted race, V3 and V4 reported no warnings (4 threads x 20000 iterations). test-lockfree PASS.
+- Source files regrouped into topic folders; clean rebuild OK.
+- Step 6: virtual loss added to V4 as an option: None / Fixed(v) / Adaptive(lambda). test-virtual-loss PASS (tactics, 0 lost updates, tiny pool OK).
 
 ## Next
-- Step 4 (built; race-demo and test-locked PASS; 20-game strength run for T=2,4 done): V3 shared tree with spin locks (uct_tree_locked.hpp, spinlock.hpp), race_demo.cpp, test_locked.cpp (speed + lock contention), strength_v3.cpp (V3 vs V0 equal time / equal playouts), arena.hpp play_match. Run: `make race-demo`, `make test-locked`, `make strength-v3 ARGS="20"` first, then the full 100 games.
-- Step 5 (done: test-lockfree PASS; TSan control reported the planted race (2 warnings, so the tool works here with setarch -R); TSan on V3, V4 exact and V4 racy reported no warnings, 4 threads x 20000 iterations each): V4 lock-free (uct_tree_lockfree.hpp; exact fetch_add mode and racy load+store mode), team.hpp (OpenMP or std::thread launcher; V3 now uses it), test_lockfree.cpp (V0/V3/V4 speed in one run), tsan_check.cpp. Run: `make test-lockfree`, `make tsan-control`, `make tsan`.
-- Step 6: fixed virtual loss, then V5 adaptive.
+- Step 7: benchmark and tournament harness (speed runs, strength runs, strength-speedup runs, CSV, plots). Include V4 racy vs exact strength (is the lost-update loss harmless?). Show useful nodes separately from wasted slots.
+- Step 8: graph model, exact solver, MCTS on the graph, ranked weak paths, graph-planner table.
+- Step 9: lambda sweep on a SEPARATE tuning run, freeze it, tune the fixed baseline too, full experiment, final tables and plots, honest discussion.
+- Step 10: LaTeX paper, README, GitHub-ready repo. User must verify reference [4].
 
 ## Results so far
 - hello_threads, 4 runs (400M steps): 1 thread ~373-380 ms; 2 threads speedup 1.96-2.01; 4 threads 3.84-3.92; 8 threads 5.62-6.67 (noisy: depends on which cores the OS picks on this hybrid CPU).
@@ -30,11 +45,15 @@ Project: Adaptive Virtual Loss for Lock-Free Parallel MCTS (our adaptive formula
 - Step 4 V3 (locks) correctness: 0 lost updates (8 threads x 200000 iterations; also with a tiny 4096-node pool); tactics 10/10 x4.
 - Step 4 V3 speed (0.1 s, 10 repeats, playouts/sec): V0 2.08M; V3 T=1 1.85M (0.89x V0), T=2 1.80M, T=4 1.87M, T=8 1.50M (0.72x V0). V3 gives NO speedup on this machine. Lock acquisitions ~15-16 per iteration; contended: 4.6% (T=2), 14.9% (T=4), 25.2% (T=8).
 - Step 4 strength (20 games per match only, so CIs about +/-20 points): V3 vs V0 equal time: T=2 57.5% [36.4, 76.2], T=4 52.5% [32.0, 72.1]; equal playouts (V0 0.09 s): T=2 52.5%, T=4 62.5% [40.9, 80.0]. All consistent with 50%. The 8-thread match and the full 100-game runs are NOT done; do them in the Step 7 harness.
-- Finding to report honestly: lock-based shared tree does not scale here (cheap ~0.17 us playouts, so tree/lock work dominates). Hypothesis (untested): cache-line bouncing on hot locks; V4 lock-free should reduce it.
+- Finding to report honestly: lock-based shared tree does not scale here (cheap ~0.17 us playouts, so tree/lock work dominates). Hypothesis (untested): cache-line bouncing on hot locks.
 - Step 5 correctness: V4 exact 0 lost updates (8 threads x 200000 iterations, also with a 4096-node pool); tactics 10/10 x4. V4 racy lost 14775-17984 root-level visits per 100000 iterations at 8 threads (5 runs).
-- Step 5 speed (0.1 s, 10 repeats, playouts/sec; V0 = 2.05M): V3 locks T=1/2/4/8: 1.90M / 1.84M / 1.83M / 1.80M (0.88x V0 at T=8; an earlier run gave 1.50M at T=8, so cross-run variation exceeds the within-run std). V4 atomic add: 1.80M / 2.30M / 3.29M / 4.05M (2.26x own, 1.98x V0 at T=8, efficiency 0.28). V4 racy: 1.94M / 2.48M / 3.78M / 5.48M (2.82x own, 2.68x V0 at T=8).
-- Step 5 V4 bookkeeping at T=8 (per 0.1 s search): exact mode 32.7k failed expansions (about 8% of iterations), 228k wasted nodes (34% of the 662k slots counted in 'tree nodes'; useful tree about 434k nodes for about 405k iterations, versus V0 428k nodes for about 205k iterations, so the tree grows slower per playout = duplicated work). Racy mode lost 17.3% of iterations' root visits at T=8 (6.9% at T=4, 1.7% at T=2): NOT rare at 8 threads; whether it hurts strength is untested.
+- Step 5 speed (0.1 s, 10 repeats, playouts/sec; V0 = 2.05M): V3 locks T=1/2/4/8: 1.90M / 1.84M / 1.83M / 1.80M (0.88x V0 at T=8; an earlier run gave 1.50M at T=8, so cross-run variation exceeds the within-run std). V4 atomic add: 1.80M / 2.30M / 3.29M / 4.05M (2.26x own, 1.98x V0 at T=8, efficiency 0.28). V4 racy: 1.94M / 2.48M / 3.78M / 5.48M (2.82x own, 2.68x V0 at T=8). A rerun after the folder move gave the same picture (V4 exact 4.02M, racy 5.36M at T=8).
+- Step 5 V4 bookkeeping at T=8 (per 0.1 s search): exact mode ~8% of iterations hit a failed expansion; about a third of allocated node slots wasted. Racy mode lost 16-17% of root visits at T=8 (about 7% at T=4, 1-2% at T=2): NOT rare at 8 threads; whether it hurts strength is untested.
+- Step 6 duplicated work at T=8 (V4, 0.1 s, 10 repeats; failed expansions % of iterations / wasted slots % / useful nodes per iteration; 1 thread has 2.10): no virtual loss 5.50 / 37.0 / 0.65; fixed v=1 2.07 / 6.64 / 2.03; fixed v=3 1.71 / 5.54 / 2.04; adaptive lambda=1 (UNTUNED placeholder) 2.81 / 8.94 / 1.99. Virtual loss restores tree growth per iteration to roughly the sequential value. Strength NOT measured yet.
+- Step 6 speed at T=8 (playouts/sec): none 4.04M, fixed v=1 3.85M, fixed v=3 3.98M, adaptive lambda=1 3.78M; efficiency about 0.27 for all. Virtual loss does not raise raw speed (slightly lower, about 2-6%).
+- Step 6 worked example (A: 60 visits, 39 wins; B: 40 visits, 22 wins): without penalty the second thread picks A (A 1.0418 vs B 1.0299); with v=1 it picks B (1.0283 vs 1.0304); with v=3 it picks B (1.0026 vs 1.0314).
 
 ## Notes
-- User runs all builds/commands and pastes output; Claude edits code and gives instructions.
+- Claude may run the make build/test commands itself (WSL: `wsl bash -lc 'cd ~/mcts && make ...'`); nothing else without asking. The user commits.
 - Only claim results for thread counts the machine really has; report hyper-threads / E-cores separately.
+- make may print "Clock skew detected": WSL and Windows file times differ by milliseconds; harmless (run `make clean` if a rebuild seems skipped).
