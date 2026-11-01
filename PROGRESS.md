@@ -10,10 +10,11 @@ Project: Adaptive Virtual Loss for Lock-Free Parallel MCTS (our adaptive formula
 - Step 0: folder layout, Makefile, timing helper, hello_threads. Built and run in WSL2 (project linked as ~/mcts).
 - Step 1 (built; test-connect4 PASS, 0 rule mismatches): Game interface (game.hpp), Connect-4 bitboard (connect4.hpp), per-thread RNG (rng.hpp), stats / run-info / CSV helpers, test_connect4.cpp.
 - Step 2 (built; test-uct PASS): V0 sequential UCT (uct_v0.hpp), arena.hpp, test_uct.cpp (tactics, V0 vs random, first speed table).
+- Step 3 (built; test-parallel PASS): V1 leaf parallel (uct_leaf_parallel.hpp), V2 root parallel (uct_root_parallel.hpp), test_parallel.cpp.
 
 ## Next
-- Step 3 (code written, waiting for user to build and run `make test-parallel`): V1 leaf parallel (uct_leaf_parallel.hpp), V2 root parallel (uct_root_parallel.hpp), test_parallel.cpp with speed table for 1/2/4/8 threads.
-- Step 4: V3 shared tree with locks.
+- Step 4 (code written, waiting for user to build and run): V3 shared tree with spin locks (uct_tree_locked.hpp, spinlock.hpp), race_demo.cpp, test_locked.cpp (speed + lock contention), strength_v3.cpp (V3 vs V0 equal time / equal playouts), arena.hpp play_match. Run: `make race-demo`, `make test-locked`, `make strength-v3 ARGS="20"` first, then the full 100 games.
+- Step 5: V4 lock-free (atomics). Also the planned ThreadSanitizer run of V3 (needs a std::thread launcher: libgomp is not TSan-instrumented, so OpenMP gives false alarms).
 
 ## Results so far
 - hello_threads, 4 runs (400M steps): 1 thread ~373-380 ms; 2 threads speedup 1.96-2.01; 4 threads 3.84-3.92; 8 threads 5.62-6.67 (noisy: depends on which cores the OS picks on this hybrid CPU).
@@ -23,6 +24,7 @@ Project: Adaptive Virtual Loss for Lock-Free Parallel MCTS (our adaptive formula
 - V0 vs Random (100 games, colours alternate, 0.02 s/move, seeds 2024/777): 100 W / 0 D / 0 L, Wilson 95% CI 96.3%-100%.
 - V0 speed (empty board, 0.1 s/move, 20 repeats, 1 thread): 2.19M +/- 0.06M playouts/sec; latency 100.01 ms mean and p95; ~457k tree nodes per search; node pool never exhausted. This is the 1-thread baseline for all speedups.
 - Empty-board search (seed 1, 0.1 s): centre column got 153429 of 175936 root visits (87%).
+- Step 3 speed (0.1 s/move, 10 repeats, playouts/sec; speedup vs own 1 thread; rate vs V0 1.00 = 2.15M): V1 leaf 1 playout/thread: 1.62M (T=1) -> 3.28M (T=8), 2.02x own, 1.52x V0. V1 leaf 16 playouts/thread: 6.09M -> 16.7M, 2.74x own, 7.77x V0 (but tree only ~28k nodes at T=8: playouts are less informative). V2 root: 1.82M (T=1, 0.85x V0, std 7%, unexplained) -> 9.17M (T=8), 5.04x own, 4.27x V0. V2 T=4: one repeat took 108 ms (p95 of 10 runs = the max). All tactics passed 10/10 for V1 and V2 with 4 threads.
 
 ## Notes
 - User runs all builds/commands and pastes output; Claude edits code and gives instructions.

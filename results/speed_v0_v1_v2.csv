@@ -1,0 +1,14 @@
+timestamp,git_commit,cpu_model,logical_cpus,ram_mb,compiler,version,threads,time_per_move_s,repeats,base_seed,playouts_per_sec_mean,playouts_per_sec_std,speedup_vs_1,efficiency,latency_mean_ms,latency_p95_ms,tree_nodes_mean,lost_updates,pool_exhausted
+2026-11-01T13:32:25,80e498a,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V0 sequential UCT,1,0.100,10,7000,2149479,45529,1.000,1.000,100.00,100.01,448686,n/a,no
+2026-11-01T13:32:25,80e498a,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V1 leaf (1 playout/thread),1,0.100,10,7000,1623447,44844,1.000,1.000,100.01,100.01,341858,n/a,no
+2026-11-01T13:32:25,80e498a,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V1 leaf (1 playout/thread),2,0.100,10,7000,2154211,58472,1.327,0.663,100.01,100.02,232742,n/a,no
+2026-11-01T13:32:25,80e498a,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V1 leaf (1 playout/thread),4,0.100,10,7000,2936230,113057,1.809,0.452,100.01,100.02,161911,n/a,no
+2026-11-01T13:32:25,80e498a,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V1 leaf (1 playout/thread),8,0.100,10,7000,3277735,184419,2.019,0.252,100.01,100.04,90177,n/a,no
+2026-11-01T13:32:25,80e498a,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V1 leaf (16 playouts/thread),1,0.100,10,7000,6090683,280031,1.000,1.000,100.06,100.32,84243,n/a,no
+2026-11-01T13:32:25,80e498a,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V1 leaf (16 playouts/thread),2,0.100,10,7000,9139361,887275,1.501,0.750,100.04,100.09,63391,n/a,no
+2026-11-01T13:32:25,80e498a,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V1 leaf (16 playouts/thread),4,0.100,10,7000,12427683,1784654,2.040,0.510,100.04,100.08,42020,n/a,no
+2026-11-01T13:32:25,80e498a,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V1 leaf (16 playouts/thread),8,0.100,10,7000,16700423,740679,2.742,0.343,100.07,100.12,27650,n/a,no
+2026-11-01T13:32:25,80e498a,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V2 root parallel,1,0.100,10,7000,1819264,129482,1.000,1.000,100.02,100.04,381969,n/a,no
+2026-11-01T13:32:25,80e498a,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V2 root parallel,2,0.100,10,7000,3458716,185093,1.901,0.951,100.02,100.10,727104,n/a,no
+2026-11-01T13:32:25,80e498a,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V2 root parallel,4,0.100,10,7000,5315887,761344,2.922,0.730,100.83,108.07,1123453,n/a,no
+2026-11-01T13:32:25,80e498a,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V2 root parallel,8,0.100,10,7000,9173032,596811,5.042,0.630,100.04,100.07,1921432,n/a,no
