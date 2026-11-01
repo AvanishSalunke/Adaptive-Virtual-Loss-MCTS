@@ -29,7 +29,7 @@ HEADERS     := $(foreach d,$(HEADER_DIRS),$(wildcard $(d)/*.hpp))
 # from the name alone.
 vpath %.cpp $(SRC_DIR)/tests $(SRC_DIR)/benchmarks $(SRC_DIR)/experiments
 
-all: $(BUILD_DIR)/test_connect4 $(BUILD_DIR)/test_uct $(BUILD_DIR)/compare
+all: $(BUILD_DIR)/test_connect4 $(BUILD_DIR)/test_uct $(BUILD_DIR)/compare $(BUILD_DIR)/planner
 
 experiments: $(BUILD_DIR)/hello_threads $(BUILD_DIR)/race_demo $(BUILD_DIR)/test_parallel \
              $(BUILD_DIR)/test_locked $(BUILD_DIR)/test_lockfree $(BUILD_DIR)/test_virtual_loss \
@@ -60,6 +60,19 @@ compare-tune: $(BUILD_DIR)/compare
 
 compare-final: $(BUILD_DIR)/compare
 	./$(BUILD_DIR)/compare final $(ARGS)
+
+# The attack-path planner. Usage:
+#   make planner-demo  ARGS="50 7"        (hosts, network seed)
+#   make planner-tune
+#   make planner-final ARGS="0.5 5"       (lambda, fixed v)
+planner-demo: $(BUILD_DIR)/planner
+	./$(BUILD_DIR)/planner demo $(ARGS)
+
+planner-tune: $(BUILD_DIR)/planner
+	./$(BUILD_DIR)/planner tune
+
+planner-final: $(BUILD_DIR)/planner
+	./$(BUILD_DIR)/planner final $(ARGS)
 
 # Finished measurements (see src/experiments/).
 run-hello: $(BUILD_DIR)/hello_threads
@@ -100,4 +113,4 @@ tsan-control: $(BUILD_DIR)/tsan_check
 clean:
 	rm -rf $(BUILD_DIR)
 
-.PHONY: all experiments test-connect4 test-uct compare-tune compare-final run-hello test-parallel race-demo test-locked test-lockfree test-virtual-loss strength-v3 tsan tsan-control clean
+.PHONY: all experiments test-connect4 test-uct compare-tune compare-final planner-demo planner-tune planner-final run-hello test-parallel race-demo test-locked test-lockfree test-virtual-loss strength-v3 tsan tsan-control clean

@@ -97,7 +97,55 @@ public:
         return out;
     }
 
+    // The plan the search recommends: from the root, repeatedly follow the
+    // child with the most visits, as far as the tree goes.
+    std::vector<Move> principal_path() const {
+        std::vector<Move> path;
+        int node = 0;
+        while (pool_[node].n_children > 0) {
+            const int first = pool_[node].first_child;
+            int best = -1;
+            int best_visits = 0;
+            for (int i = 0; i < pool_[node].n_children; ++i) {
+                if (pool_[first + i].visits > best_visits) {
+                    best_visits = pool_[first + i].visits;
+                    best = first + i;
+                }
+            }
+            if (best < 0) break;
+            path.push_back(pool_[best].move);
+            node = best;
+        }
+        return path;
+    }
+
+    // Calls f(path, final_state) for every finished game that the tree has
+    // reached (path = the moves from the root).
+    template <class F>
+    void for_each_finished(const G& root_state, F f) const {
+        std::vector<Move> path;
+        walk_finished(0, root_state, path, f);
+    }
+
 private:
+    template <class F>
+    void walk_finished(int node, const G& state, std::vector<Move>& path, F& f) const {
+        if (state.is_over()) {
+            f(path, state);
+            return;
+        }
+        const int first = pool_[node].first_child;
+        for (int i = 0; i < pool_[node].n_children; ++i) {
+            const Node& child = pool_[first + i];
+            if (child.visits == 0) continue;
+            G next = state;
+            next.play(child.move);
+            path.push_back(child.move);
+            walk_finished(first + i, next, path, f);
+            path.pop_back();
+        }
+    }
+
     // Deliberately no default member initialisers: that keeps `new Node[n]`
     // from touching all the memory up front. Every field is set in init_node().
     // 32 bytes, so two nodes share one 64-byte cache line.

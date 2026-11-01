@@ -1,0 +1,10 @@
+timestamp,git_commit,cpu_model,logical_cpus,ram_mb,compiler,mode,version,threads,time_budget_s,networks,repeats,playouts_per_sec,found_best_pct,found_best_se_pct,mean_regret,mean_regret_se,top3_agreement,top3_agreement_se,exploration_c,network_seed_base,pool_exhausted
+2026-11-01T17:26:29,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,tune,V0 sequential UCT (reference),1,0.050,15,10,12744454,97.33,2.06,0.00176,0.00166,0.9267,0.0478,0.300,1000,no
+2026-11-01T17:26:29,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,tune,V4 + fixed virtual loss (v=1),8,0.050,15,10,5101486,94.00,4.12,0.00268,0.00223,0.8756,0.0545,0.300,1000,no
+2026-11-01T17:26:29,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,tune,V4 + fixed virtual loss (v=3),8,0.050,15,10,4801920,96.00,2.89,0.00240,0.00221,0.9000,0.0482,0.300,1000,no
+2026-11-01T17:26:29,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,tune,V4 + fixed virtual loss (v=5),8,0.050,15,10,4632545,94.67,5.33,0.00444,0.00444,0.9167,0.0464,0.300,1000,no
+2026-11-01T17:26:29,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,tune,V4 + fixed virtual loss (v=10),8,0.050,15,10,4661757,96.00,4.00,0.00333,0.00333,0.9356,0.0345,0.300,1000,no
+2026-11-01T17:26:29,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,tune,V5 adaptive (lambda=0.5),8,0.050,15,10,4697307,94.00,4.34,0.00360,0.00332,0.8911,0.0501,0.300,1000,no
+2026-11-01T17:26:29,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,tune,V5 adaptive (lambda=1.0),8,0.050,15,10,4587661,96.67,2.70,0.00231,0.00221,0.8856,0.0556,0.300,1000,no
+2026-11-01T17:26:29,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,tune,V5 adaptive (lambda=2.0),8,0.050,15,10,4457461,98.00,1.45,0.00120,0.00111,0.9167,0.0456,0.300,1000,no
+2026-11-01T17:26:29,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,tune,V5 adaptive (lambda=4.0),8,0.050,15,10,4599659,94.67,4.13,0.00351,0.00332,0.9156,0.0381,0.300,1000,no

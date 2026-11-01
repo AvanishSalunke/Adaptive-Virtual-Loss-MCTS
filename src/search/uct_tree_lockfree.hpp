@@ -4,8 +4,9 @@
 // anybody: every shared number is a std::atomic and is changed with a single
 // indivisible hardware operation.
 //
-// * Statistics. visits and wins2 (twice the summed result, so that it is a
-//   whole number: results are 0, 0.5 or 1) are atomic integers.
+// * Statistics. visits and wins are atomic integers. wins holds the summed
+//   results in fixed point (units of 1/65536), so results of any size between
+//   0 and 1 are kept, and 0, 0.5 and 1 are represented exactly.
 //   - exact mode:  fetch_add, one indivisible "read, add, write". No update is lost.
 //   - racy mode:   load, then store(value + 1). Each step is atomic but the
 //                  pair is not, so two threads can both load 100 and both
@@ -132,10 +133,44 @@ public:
         for (int i = 0; i < n; ++i) {
             const Node& c = pool_[first + i];
             const int v = c.visits.load(std::memory_order_relaxed);
-            const int w2 = c.wins2.load(std::memory_order_relaxed);
-            out.push_back({c.move, v, v > 0 ? 0.5 * w2 / v : 0.0});
+            const int64_t w = c.wins.load(std::memory_order_relaxed);
+            out.push_back({c.move, v, v > 0 ? static_cast<double>(w) / (static_cast<double>(kScale) * v) : 0.0});
         }
         return out;
+    }
+
+    // The plan the search recommends: from the root, repeatedly follow the
+    // child with the most visits, as far as the tree goes. Call it after search().
+    std::vector<Move> principal_path() const {
+        std::vector<Move> path;
+        int node = 0;
+        for (;;) {
+            const uint64_t packed = pool_[node].children.load(std::memory_order_acquire);
+            if (packed == 0) break;
+            const int first = static_cast<int>(packed >> 16);
+            const int n = static_cast<int>(packed & 0xFFFF);
+            int best = -1;
+            int best_visits = 0;
+            for (int i = 0; i < n; ++i) {
+                const int v = pool_[first + i].visits.load(std::memory_order_relaxed);
+                if (v > best_visits) {
+                    best_visits = v;
+                    best = first + i;
+                }
+            }
+            if (best < 0) break;
+            path.push_back(pool_[best].move);
+            node = best;
+        }
+        return path;
+    }
+
+    // Calls f(path, final_state) for every finished game that the tree has
+    // reached (path = the moves from the root). Call it after search().
+    template <class F>
+    void for_each_finished(const G& root_state, F f) const {
+        std::vector<Move> path;
+        walk_finished(0, root_state, path, f);
     }
 
     // Every finished iteration adds exactly 1 to one root child. The gap
@@ -149,11 +184,14 @@ public:
     }
 
 private:
+    // Fixed-point scale of `wins`: a result of 1.0 is added as 65536.
+    static constexpr int64_t kScale = 65536;
+
     // 32 bytes. No default initialisers, so `new Node[n]` does not touch the memory.
     struct Node {
         std::atomic<uint64_t> children;  // (first child << 16) | count; 0 = not expanded
+        std::atomic<int64_t> wins;       // summed results in units of 1/kScale, from `mover`'s point of view
         std::atomic<int32_t> visits;
-        std::atomic<int32_t> wins2;      // twice the summed result, from `mover`'s point of view
         int32_t parent;                  // plain data: written before the node is published, then never changed
         Move move;
         int8_t mover;
@@ -174,13 +212,34 @@ private:
         std::vector<PathEntry> path;  // reused by every iteration of this thread
     };
 
+    template <class F>
+    void walk_finished(int node, const G& state, std::vector<Move>& path, F& f) const {
+        if (state.is_over()) {
+            f(path, state);
+            return;
+        }
+        const uint64_t packed = pool_[node].children.load(std::memory_order_acquire);
+        if (packed == 0) return;
+        const int first = static_cast<int>(packed >> 16);
+        const int n = static_cast<int>(packed & 0xFFFF);
+        for (int i = 0; i < n; ++i) {
+            const Node& child = pool_[first + i];
+            if (child.visits.load(std::memory_order_relaxed) == 0) continue;
+            G next = state;
+            next.play(child.move);
+            path.push_back(child.move);
+            walk_finished(first + i, next, path, f);
+            path.pop_back();
+        }
+    }
+
     // Only used on nodes that no other thread can see yet (the root before the
     // team starts, or a block of children before it is published).
     void init_node(int idx, int parent, Move move, int mover) {
         Node& nd = pool_[idx];
         nd.children.store(0, std::memory_order_relaxed);
         nd.visits.store(0, std::memory_order_relaxed);
-        nd.wins2.store(0, std::memory_order_relaxed);
+        nd.wins.store(0, std::memory_order_relaxed);
         nd.parent = parent;
         nd.move = move;
         nd.mover = static_cast<int8_t>(mover);
@@ -217,23 +276,23 @@ private:
 
         // Back up along the path we walked, swapping each virtual loss for the real result.
         for (const PathEntry& e : td.path) {
-            const int r2 = static_cast<int>(2.0 * final_state.result(pool_[e.node].mover) + 0.5);
-            update(pool_[e.node], r2, e.penalty);
+            const int64_t gain = static_cast<int64_t>(std::llround(final_state.result(pool_[e.node].mover) * kScale));
+            update(pool_[e.node], gain, e.penalty);
         }
     }
 
-    void update(Node& nd, int r2, int penalty) {
+    void update(Node& nd, int64_t gain, int penalty) {
         if (penalty > 0) {
             // Replace the temporary penalty visits by one real visit with its result.
             nd.visits.fetch_add(1 - penalty, std::memory_order_relaxed);
-            nd.wins2.fetch_add(r2, std::memory_order_relaxed);
+            nd.wins.fetch_add(gain, std::memory_order_relaxed);
         } else if (exact_updates_) {
             nd.visits.fetch_add(1, std::memory_order_relaxed);
-            nd.wins2.fetch_add(r2, std::memory_order_relaxed);
+            nd.wins.fetch_add(gain, std::memory_order_relaxed);
         } else {
             // Two separate atomic steps: another thread can slip in between them.
             nd.visits.store(nd.visits.load(std::memory_order_relaxed) + 1, std::memory_order_relaxed);
-            nd.wins2.store(nd.wins2.load(std::memory_order_relaxed) + r2, std::memory_order_relaxed);
+            nd.wins.store(nd.wins.load(std::memory_order_relaxed) + gain, std::memory_order_relaxed);
         }
     }
 
@@ -270,7 +329,7 @@ private:
     // child_visits receives the visit count of the chosen child as seen in the snapshot.
     int select_child(int first, int n, bool& fresh, int& child_visits) const {
         int32_t vis[G::kMaxMoves];
-        int32_t w2[G::kMaxMoves];
+        int64_t wins[G::kMaxMoves];
         for (int i = 0; i < n; ++i) {
             vis[i] = pool_[first + i].visits.load(std::memory_order_relaxed);
             if (vis[i] == 0) {
@@ -278,7 +337,7 @@ private:
                 child_visits = 0;
                 return first + i;
             }
-            w2[i] = pool_[first + i].wins2.load(std::memory_order_relaxed);
+            wins[i] = pool_[first + i].wins.load(std::memory_order_relaxed);
         }
         long long total = 0;
         for (int i = 0; i < n; ++i) total += vis[i];
@@ -286,7 +345,8 @@ private:
         int best = 0;
         double best_score = -1.0;
         for (int i = 0; i < n; ++i) {
-            const double score = 0.5 * w2[i] / vis[i] + exploration_ * std::sqrt(log_parent / vis[i]);
+            const double score = static_cast<double>(wins[i]) / (static_cast<double>(kScale) * vis[i]) +
+                                 exploration_ * std::sqrt(log_parent / vis[i]);
             if (score > best_score) {
                 best_score = score;
                 best = i;
