@@ -8,7 +8,7 @@ SRC_DIR  := src
 BUILD_DIR := build
 HEADERS  := $(wildcard $(SRC_DIR)/*.hpp)
 
-all: $(BUILD_DIR)/hello_threads $(BUILD_DIR)/test_connect4 $(BUILD_DIR)/test_uct
+all: $(BUILD_DIR)/hello_threads $(BUILD_DIR)/test_connect4 $(BUILD_DIR)/test_uct $(BUILD_DIR)/test_parallel
 
 # Pattern rule: build/<name> is compiled from src/<name>.cpp, and a change to
 # any header rebuilds it.
@@ -30,7 +30,10 @@ test-connect4: $(BUILD_DIR)/test_connect4
 test-uct: $(BUILD_DIR)/test_uct
 	./$(BUILD_DIR)/test_uct
 
+test-parallel: $(BUILD_DIR)/test_parallel
+	./$(BUILD_DIR)/test_parallel
+
 clean:
 	rm -rf $(BUILD_DIR)
 
-.PHONY: all run-hello test-connect4 test-uct clean
+.PHONY: all run-hello test-connect4 test-uct test-parallel clean

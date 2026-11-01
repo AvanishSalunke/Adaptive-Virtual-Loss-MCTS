@@ -1,0 +1,3 @@
+timestamp,git_commit,cpu_model,logical_cpus,ram_mb,compiler,pairing,games,wins,draws,losses,win_rate,ci95_low,ci95_high,time_per_move_s,threads,v0_seed,random_seed
+2026-10-30T15:57:56,5d84cf8,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V0 vs Random,100,100,0,0,1.0000,0.9630,1.0000,0.020,1,2024,777
+2026-10-30T15:59:14,5d84cf8,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V0 vs Random,100,100,0,0,1.0000,0.9630,1.0000,0.020,1,2024,777
