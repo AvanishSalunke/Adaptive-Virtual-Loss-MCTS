@@ -11,9 +11,9 @@ Project: Adaptive Virtual Loss for Lock-Free Parallel MCTS (our adaptive formula
 - parallel/    spinlock.hpp, team.hpp (OpenMP or std::thread launcher)
 - games/       game.hpp (interface), connect4.hpp, arena.hpp (match play)
 - search/      uct_v0.hpp (V0), uct_leaf_parallel.hpp (V1), uct_root_parallel.hpp (V2), uct_tree_locked.hpp (V3), uct_tree_lockfree.hpp (V4, optional virtual loss = V5), virtual_loss.hpp (penalty rule)
-- demos/       hello_threads.cpp, race_demo.cpp
-- tests/       test_connect4, test_uct, test_parallel, test_locked, test_lockfree, test_virtual_loss, tsan_check
-- benchmarks/  strength_v3.cpp
+- tests/       test_connect4, test_uct (basic correctness)
+- benchmarks/  compare.cpp: the final comparison (tuning run, then frozen final run)
+- experiments/ finished measurements kept as evidence for the paper: hello_threads, race_demo, test_parallel, test_locked, test_lockfree, test_virtual_loss, strength_v3, tsan_check (`make experiments` builds them)
 Headers are found through -I flags in the Makefile, so sources include them by bare name. Results go to results/*.csv.
 
 ## Done
@@ -27,7 +27,8 @@ Headers are found through -I flags in the Makefile, so sources include them by b
 - Step 6: virtual loss added to V4 as an option: None / Fixed(v) / Adaptive(lambda). test-virtual-loss PASS (tactics, 0 lost updates, tiny pool OK).
 
 ## Next
-- Step 7: benchmark and tournament harness (speed runs, strength runs, strength-speedup runs, CSV, plots). Include V4 racy vs exact strength (is the lost-update loss harmless?). Show useful nodes separately from wasted slots.
+- FOCUS (user request): stop adding experiments. The remaining job is to compare the final V5 against V4 + fixed (and V0). `compare.cpp` is written and smoke-tested (2 games). Plan: `make compare-tune ARGS="8 100"` (tuning run, ~30 min), freeze lambda and fixed v, then `make compare-final ARGS="8 400 <lambda> <v>"` (~20 min). Then plots/tables, graph planner, paper.
+- Step 7 (reduced): only what the final comparison needs. The strength-speedup table (V0 at 0.1/0.2/0.4/0.8 s) and plots come after the final run, if time allows. V4 racy vs exact strength is optional.
 - Step 8: graph model, exact solver, MCTS on the graph, ranked weak paths, graph-planner table.
 - Step 9: lambda sweep on a SEPARATE tuning run, freeze it, tune the fixed baseline too, full experiment, final tables and plots, honest discussion.
 - Step 10: LaTeX paper, README, GitHub-ready repo. User must verify reference [4].

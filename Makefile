@@ -3,13 +3,13 @@
 # absolute path contains spaces (make does not quote such paths for you).
 #
 # Source layout (src/):
-#   util/        small helpers: timing, random numbers, statistics, run info, CSV rows
-#   parallel/    thread helpers: spin lock, thread-team launcher
-#   games/       the game interface, Connect-4, and the match arena
-#   search/      the Monte Carlo Tree Search implementations
-#   demos/       small stand-alone demonstration programs
-#   tests/       correctness tests (several also print speed tables)
-#   benchmarks/  long-running strength measurements
+#   util/         small helpers: timing, random numbers, statistics, run info, CSV rows
+#   parallel/     thread helpers: spin lock, thread-team launcher
+#   games/        the game interface, Connect-4, and the match arena
+#   search/       the Monte Carlo Tree Search implementations
+#   tests/        correctness tests
+#   benchmarks/   the final strength comparison
+#   experiments/  finished measurements kept as evidence (build with `make experiments`)
 
 CXX       := g++
 CXXFLAGS  := -O2 -std=c++17 -fopenmp -pthread -Wall -Wextra
@@ -24,11 +24,13 @@ HEADERS     := $(foreach d,$(HEADER_DIRS),$(wildcard $(d)/*.hpp))
 
 # Programs live in these folders; vpath lets make find src/<folder>/<name>.cpp
 # from the name alone.
-vpath %.cpp $(SRC_DIR)/demos $(SRC_DIR)/tests $(SRC_DIR)/benchmarks
+vpath %.cpp $(SRC_DIR)/tests $(SRC_DIR)/benchmarks $(SRC_DIR)/experiments
 
-all: $(BUILD_DIR)/hello_threads $(BUILD_DIR)/test_connect4 $(BUILD_DIR)/test_uct $(BUILD_DIR)/test_parallel \
-     $(BUILD_DIR)/race_demo $(BUILD_DIR)/test_locked $(BUILD_DIR)/strength_v3 \
-     $(BUILD_DIR)/test_lockfree $(BUILD_DIR)/test_virtual_loss
+all: $(BUILD_DIR)/test_connect4 $(BUILD_DIR)/test_uct $(BUILD_DIR)/compare
+
+experiments: $(BUILD_DIR)/hello_threads $(BUILD_DIR)/race_demo $(BUILD_DIR)/test_parallel \
+             $(BUILD_DIR)/test_locked $(BUILD_DIR)/test_lockfree $(BUILD_DIR)/test_virtual_loss \
+             $(BUILD_DIR)/strength_v3
 
 # Pattern rule: build/<name> is compiled from <name>.cpp, and a change to any
 # header rebuilds it.
@@ -41,14 +43,24 @@ $(BUILD_DIR)/%: %.cpp $(HEADERS) | $(BUILD_DIR)
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-run-hello: $(BUILD_DIR)/hello_threads
-	./$(BUILD_DIR)/hello_threads
-
 test-connect4: $(BUILD_DIR)/test_connect4
 	./$(BUILD_DIR)/test_connect4
 
 test-uct: $(BUILD_DIR)/test_uct
 	./$(BUILD_DIR)/test_uct
+
+# The final comparison. Usage:
+#   make compare-tune  ARGS="8 100"            (threads, games per candidate)
+#   make compare-final ARGS="8 400 1.0 3"      (threads, games, lambda, fixed v)
+compare-tune: $(BUILD_DIR)/compare
+	./$(BUILD_DIR)/compare tune $(ARGS)
+
+compare-final: $(BUILD_DIR)/compare
+	./$(BUILD_DIR)/compare final $(ARGS)
+
+# Finished measurements (see src/experiments/).
+run-hello: $(BUILD_DIR)/hello_threads
+	./$(BUILD_DIR)/hello_threads
 
 test-parallel: $(BUILD_DIR)/test_parallel
 	./$(BUILD_DIR)/test_parallel
@@ -59,15 +71,15 @@ race-demo: $(BUILD_DIR)/race_demo
 test-locked: $(BUILD_DIR)/test_locked
 	./$(BUILD_DIR)/test_locked
 
-# Usage: make strength-v3 ARGS="20 2 4"   (games per match, then thread counts)
-strength-v3: $(BUILD_DIR)/strength_v3
-	./$(BUILD_DIR)/strength_v3 $(ARGS)
-
 test-lockfree: $(BUILD_DIR)/test_lockfree
 	./$(BUILD_DIR)/test_lockfree
 
 test-virtual-loss: $(BUILD_DIR)/test_virtual_loss
 	./$(BUILD_DIR)/test_virtual_loss
+
+# Usage: make strength-v3 ARGS="20 2 4"   (games per match, then thread counts)
+strength-v3: $(BUILD_DIR)/strength_v3
+	./$(BUILD_DIR)/strength_v3 $(ARGS)
 
 # ThreadSanitizer build: std::thread instead of OpenMP, no optimisation tricks.
 $(BUILD_DIR)/tsan_check: tsan_check.cpp $(HEADERS) | $(BUILD_DIR)
@@ -85,4 +97,4 @@ tsan-control: $(BUILD_DIR)/tsan_check
 clean:
 	rm -rf $(BUILD_DIR)
 
-.PHONY: all run-hello test-connect4 test-uct test-parallel race-demo test-locked strength-v3 test-lockfree test-virtual-loss tsan tsan-control clean
+.PHONY: all experiments test-connect4 test-uct compare-tune compare-final run-hello test-parallel race-demo test-locked test-lockfree test-virtual-loss strength-v3 tsan tsan-control clean
