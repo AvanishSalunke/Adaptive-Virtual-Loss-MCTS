@@ -8,12 +8,12 @@ Project: Adaptive Virtual Loss for Lock-Free Parallel MCTS (our adaptive formula
 
 ## Source layout (src/)
 - util/        timing.hpp, rng.hpp, stats.hpp, run_info.hpp, csv_log.hpp
-- parallel/    spinlock.hpp, team.hpp (OpenMP or std::thread launcher)
+- parallel/    team.hpp (OpenMP or std::thread launcher)
 - games/       game.hpp (interface), connect4.hpp, arena.hpp (match play)
-- search/      uct_v0.hpp (V0), uct_leaf_parallel.hpp (V1), uct_root_parallel.hpp (V2), uct_tree_locked.hpp (V3), uct_tree_lockfree.hpp (V4, optional virtual loss = V5), virtual_loss.hpp (penalty rule)
+- search/      only what the final comparison needs: uct_v0.hpp (V0), uct_tree_lockfree.hpp (V4; with fixed or adaptive virtual loss = V4 + fixed / V5), virtual_loss.hpp (penalty rule)
 - tests/       test_connect4, test_uct (basic correctness)
 - benchmarks/  compare.cpp: the final comparison (tuning run, then frozen final run)
-- experiments/ finished measurements kept as evidence for the paper: hello_threads, race_demo, test_parallel, test_locked, test_lockfree, test_virtual_loss, strength_v3, tsan_check (`make experiments` builds them)
+- experiments/ everything not needed by the final comparison: V1 leaf parallel (uct_leaf_parallel.hpp), V2 root parallel (uct_root_parallel.hpp), V3 locks (uct_tree_locked.hpp), spinlock.hpp, and the finished measurements kept as evidence for the paper: hello_threads, race_demo, test_parallel, test_locked, test_lockfree, test_virtual_loss, strength_v3, tsan_check (`make experiments` builds them). V2 comes back into play only if the graph planner comparison (V0, V2, V4, V5 in the proposal) needs it.
 Headers are found through -I flags in the Makefile, so sources include them by bare name. Results go to results/*.csv.
 
 ## Done

@@ -4,12 +4,15 @@
 #
 # Source layout (src/):
 #   util/         small helpers: timing, random numbers, statistics, run info, CSV rows
-#   parallel/     thread helpers: spin lock, thread-team launcher
+#   parallel/     the thread-team launcher
 #   games/        the game interface, Connect-4, and the match arena
-#   search/       the Monte Carlo Tree Search implementations
+#   search/       what the final comparison needs: sequential UCT (V0), the lock-free
+#                 tree (V4) with fixed or adaptive virtual loss (V5), the penalty rule
 #   tests/        correctness tests
 #   benchmarks/   the final strength comparison
-#   experiments/  finished measurements kept as evidence (build with `make experiments`)
+#   experiments/  everything else: the earlier parallel versions (leaf, root, locks),
+#                 spin lock, and finished measurements kept as evidence for the paper
+#                 (build them with `make experiments`)
 
 CXX       := g++
 CXXFLAGS  := -O2 -std=c++17 -fopenmp -pthread -Wall -Wextra
@@ -18,7 +21,7 @@ BUILD_DIR := build
 
 # Every header folder is on the include path, so a source file can write
 # #include "rng.hpp" without naming the folder.
-HEADER_DIRS := $(SRC_DIR)/util $(SRC_DIR)/parallel $(SRC_DIR)/games $(SRC_DIR)/search
+HEADER_DIRS := $(SRC_DIR)/util $(SRC_DIR)/parallel $(SRC_DIR)/games $(SRC_DIR)/search $(SRC_DIR)/experiments
 INCLUDES    := $(addprefix -I,$(HEADER_DIRS))
 HEADERS     := $(foreach d,$(HEADER_DIRS),$(wildcard $(d)/*.hpp))
 
