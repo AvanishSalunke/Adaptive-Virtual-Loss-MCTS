@@ -25,7 +25,13 @@
 //   unused. Readers load `children` with acquire semantics, which guarantees
 //   they also see the fully prepared children behind it.
 //
-// There is no virtual loss yet; that comes in a later step.
+// Virtual loss (optional, see virtual_loss.hpp). When a thread chooses a child
+// it immediately adds `penalty` extra visits (with no wins) to it, so threads
+// arriving a moment later see a worse average and choose differently. When
+// the playout is finished, the penalty is taken off again and the real
+// result is added. The temporary visits must be added and removed exactly, so
+// whenever a penalty is used the updates are exact (fetch_add), whatever the
+// exact_updates setting says.
 #pragma once
 #include <algorithm>
 #include <atomic>
@@ -40,6 +46,7 @@
 #include "team.hpp"
 #include "timing.hpp"
 #include "uct_v0.hpp"  // for the shared Limit and RootChild types
+#include "virtual_loss.hpp"
 
 template <class G>
 class LockFreeTreeUct {
@@ -50,12 +57,13 @@ public:
 
     // exact_updates = true: fetch_add (no lost updates). false: racy load+store.
     LockFreeTreeUct(int threads, uint64_t seed, bool exact_updates = true,
-                    std::size_t max_nodes = (1u << 24), double exploration = 1.4142135623730951)
+                    std::size_t max_nodes = (1u << 24), double exploration = 1.4142135623730951,
+                    VirtualLoss virtual_loss = VirtualLoss())
         : threads_(threads), exact_updates_(exact_updates), exploration_(exploration),
-          capacity_(max_nodes), pool_(new Node[max_nodes]) {
+          virtual_loss_(virtual_loss), capacity_(max_nodes), pool_(new Node[max_nodes]) {
         data_.reserve(static_cast<std::size_t>(threads));
         for (int t = 0; t < threads; ++t)
-            data_.push_back(ThreadData{Rng(seed + static_cast<uint64_t>(t)), 0, 0, 0});
+            data_.push_back(ThreadData{Rng(seed + static_cast<uint64_t>(t)), 0, 0, 0, {}});
     }
 
     void reseed(uint64_t seed) {
@@ -151,11 +159,19 @@ private:
         int8_t mover;
     };
 
+    // One step of the walk down the tree: the node entered and the virtual
+    // loss added to it (0 if none), which must be removed again on the way back.
+    struct PathEntry {
+        int node;
+        int penalty;
+    };
+
     struct alignas(64) ThreadData {
         Rng rng;
         uint64_t iterations;
         uint64_t cas_failures;
         uint64_t wasted_nodes;
+        std::vector<PathEntry> path;  // reused by every iteration of this thread
     };
 
     // Only used on nodes that no other thread can see yet (the root before the
@@ -173,6 +189,7 @@ private:
     void run_iteration(const G& root_state, ThreadData& td) {
         G state = root_state;
         int node = 0;
+        td.path.clear();
 
         while (!state.is_over()) {
             Node& parent = pool_[node];
@@ -185,7 +202,12 @@ private:
             const int first = static_cast<int>(packed >> 16);
             const int n = static_cast<int>(packed & 0xFFFF);
             bool fresh = false;
-            const int child = select_child(first, n, fresh);
+            int child_visits = 0;
+            const int child = select_child(first, n, fresh, child_visits);
+            // Virtual loss: make this child look worse to the threads that come next.
+            const int penalty = virtual_loss_penalty(virtual_loss_, threads_, child_visits);
+            if (penalty > 0) pool_[child].visits.fetch_add(penalty, std::memory_order_relaxed);
+            td.path.push_back({child, penalty});
             node = child;
             state.play(pool_[child].move);
             if (fresh) break;
@@ -193,14 +215,19 @@ private:
 
         const G final_state = play_random_to_end(state, td.rng);
 
-        for (int n = node; pool_[n].parent != -1; n = pool_[n].parent) {
-            const int r2 = static_cast<int>(2.0 * final_state.result(pool_[n].mover) + 0.5);
-            update(pool_[n], r2);
+        // Back up along the path we walked, swapping each virtual loss for the real result.
+        for (const PathEntry& e : td.path) {
+            const int r2 = static_cast<int>(2.0 * final_state.result(pool_[e.node].mover) + 0.5);
+            update(pool_[e.node], r2, e.penalty);
         }
     }
 
-    void update(Node& nd, int r2) {
-        if (exact_updates_) {
+    void update(Node& nd, int r2, int penalty) {
+        if (penalty > 0) {
+            // Replace the temporary penalty visits by one real visit with its result.
+            nd.visits.fetch_add(1 - penalty, std::memory_order_relaxed);
+            nd.wins2.fetch_add(r2, std::memory_order_relaxed);
+        } else if (exact_updates_) {
             nd.visits.fetch_add(1, std::memory_order_relaxed);
             nd.wins2.fetch_add(r2, std::memory_order_relaxed);
         } else {
@@ -240,13 +267,15 @@ private:
 
     // Same rule as V0 and V3 (an unvisited child first, otherwise the best UCT
     // score), computed from one snapshot of the children's numbers.
-    int select_child(int first, int n, bool& fresh) const {
+    // child_visits receives the visit count of the chosen child as seen in the snapshot.
+    int select_child(int first, int n, bool& fresh, int& child_visits) const {
         int32_t vis[G::kMaxMoves];
         int32_t w2[G::kMaxMoves];
         for (int i = 0; i < n; ++i) {
             vis[i] = pool_[first + i].visits.load(std::memory_order_relaxed);
             if (vis[i] == 0) {
                 fresh = true;
+                child_visits = 0;
                 return first + i;
             }
             w2[i] = pool_[first + i].wins2.load(std::memory_order_relaxed);
@@ -264,6 +293,7 @@ private:
             }
         }
         fresh = false;
+        child_visits = vis[best];
         return first + best;
     }
 
@@ -287,6 +317,7 @@ private:
     int threads_;
     bool exact_updates_;
     double exploration_;
+    VirtualLoss virtual_loss_;
     std::size_t capacity_;
     std::unique_ptr<Node[]> pool_;
     std::vector<ThreadData> data_;
