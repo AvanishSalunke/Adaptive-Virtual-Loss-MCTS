@@ -6,6 +6,10 @@ Project: Adaptive Virtual Loss for Lock-Free Parallel MCTS (our adaptive formula
 - Intel Core Ultra 5 125H, 14 cores / 18 logical processors, 16 GB RAM, Windows 11 + WSL2 (Ubuntu)
 - Hybrid CPU (P-cores, E-cores, low-power E-cores): threads are not all equal; 8-thread results are noisy.
 
+## Viva folder
+- `project files/`: a self-contained COPY of everything needed to run the final adaptive virtual loss comparison on Connect-4 (compare.cpp, game/, search/, support/, Makefile, README.txt, saved results). Run `make` then `make run` inside it. It is a snapshot: the master code is in src/. Not compile-tested yet (user asked not to run anything); all #include targets were checked to exist.
+- Known open item: the graph planner's final comparison was not re-run after fixing the fixed-point reward bug in uct_tree_lockfree.hpp (planner_final.csv does not exist); do not quote planner comparison numbers. Connect-4 results are unaffected by that bug.
+
 ## Source layout (src/)
 - util/        timing.hpp, rng.hpp, stats.hpp, run_info.hpp, csv_log.hpp
 - parallel/    team.hpp (OpenMP or std::thread launcher)

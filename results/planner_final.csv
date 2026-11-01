@@ -1,0 +1,11 @@
+timestamp,git_commit,cpu_model,logical_cpus,ram_mb,compiler,mode,version,threads,time_budget_s,networks,repeats,playouts_per_sec,found_best_pct,found_best_se_pct,mean_regret,mean_regret_se,top3_agreement,top3_agreement_se,exploration_c,network_seed_base,pool_exhausted
+2026-11-01T17:27:48,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,final,V0 sequential UCT,1,0.005,15,10,8691378,99.33,0.67,0.00001,0.00001,0.7867,0.0742,0.300,1,no
+2026-11-01T17:27:48,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,final,"V4 plain, no virtual loss",1,0.005,15,10,7434201,99.33,0.67,0.00001,0.00001,0.7867,0.0742,0.300,1,no
+2026-11-01T17:27:48,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,final,"V4 plain, no virtual loss",8,0.005,15,10,5818314,91.33,5.93,0.01160,0.00807,0.7378,0.0800,0.300,1,no
+2026-11-01T17:27:48,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,final,V4 + fixed virtual loss (v=3),8,0.005,15,10,4380478,99.33,0.67,0.00099,0.00099,0.7778,0.0737,0.300,1,no
+2026-11-01T17:27:48,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,final,V5 adaptive (lambda=2.0),8,0.005,15,10,4394577,98.67,0.91,0.00107,0.00098,0.7822,0.0757,0.300,1,no
+2026-11-01T17:27:48,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,final,V0 sequential UCT,1,0.020,15,10,8896034,99.33,0.67,0.00001,0.00001,0.7911,0.0730,0.300,1,no
+2026-11-01T17:27:48,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,final,"V4 plain, no virtual loss",1,0.020,15,10,6848037,99.33,0.67,0.00001,0.00001,0.7911,0.0730,0.300,1,no
+2026-11-01T17:27:48,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,final,"V4 plain, no virtual loss",8,0.020,15,10,5411269,92.67,5.56,0.00846,0.00606,0.7533,0.0807,0.300,1,no
+2026-11-01T17:27:48,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,final,V4 + fixed virtual loss (v=3),8,0.020,15,10,4169780,100.00,0.00,0.00000,0.00000,0.7844,0.0750,0.300,1,no
+2026-11-01T17:27:48,f923ce0-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,final,V5 adaptive (lambda=2.0),8,0.020,15,10,4285459,99.33,0.67,0.00099,0.00099,0.7933,0.0714,0.300,1,no
