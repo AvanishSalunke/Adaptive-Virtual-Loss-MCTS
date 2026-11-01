@@ -1,0 +1,14 @@
+timestamp,git_commit,cpu_model,logical_cpus,ram_mb,compiler,version,threads,time_per_move_s,repeats,base_seed,playouts_per_sec_mean,playouts_per_sec_std,speedup_vs_1,efficiency,latency_mean_ms,latency_p95_ms,tree_nodes_mean,lost_updates_mean,lost_pct_of_iterations,failed_expansions_mean,wasted_nodes_mean,pool_exhausted
+2026-11-01T14:27:00,c622f09,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V0 sequential UCT,1,0.100,10,11000,2045413,54918,1.000,1.000,100.01,100.01,428416,n/a,n/a,n/a,n/a,no
+2026-11-01T14:27:00,c622f09,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V3 shared tree + locks,1,0.100,10,11000,1897759,132641,1.000,1.000,100.02,100.06,398900,0.00,0.0000,n/a,n/a,no
+2026-11-01T14:27:00,c622f09,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V3 shared tree + locks,2,0.100,10,11000,1843720,33968,0.972,0.486,100.01,100.02,354448,0.00,0.0000,n/a,n/a,no
+2026-11-01T14:27:00,c622f09,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V3 shared tree + locks,4,0.100,10,11000,1830843,161904,0.965,0.241,100.03,100.07,323381,0.00,0.0000,n/a,n/a,no
+2026-11-01T14:27:00,c622f09,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V3 shared tree + locks,8,0.100,10,11000,1802703,47777,0.950,0.119,100.04,100.07,316904,0.00,0.0000,n/a,n/a,no
+2026-11-01T14:27:00,c622f09,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V4 lock-free (atomic add),1,0.100,10,11000,1796295,50830,1.000,1.000,100.01,100.02,377981,0.00,0.0000,0.00,0.00,no
+2026-11-01T14:27:00,c622f09,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V4 lock-free (atomic add),2,0.100,10,11000,2303032,53280,1.282,0.641,100.01,100.04,435908,0.00,0.0000,3123.80,21820.30,no
+2026-11-01T14:27:00,c622f09,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V4 lock-free (atomic add),4,0.100,10,11000,3290308,33648,1.832,0.458,100.02,100.03,577154,0.00,0.0000,23024.40,160589.70,no
+2026-11-01T14:27:00,c622f09,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V4 lock-free (atomic add),8,0.100,10,11000,4053158,96415,2.256,0.282,100.03,100.04,662428,0.00,0.0000,32717.00,228137.80,no
+2026-11-01T14:27:00,c622f09,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V4 lock-free (racy load+store),1,0.100,10,11000,1941517,59513,1.000,1.000,100.01,100.02,407500,0.00,0.0000,0.00,0.00,no
+2026-11-01T14:27:00,c622f09,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V4 lock-free (racy load+store),2,0.100,10,11000,2478579,51489,1.277,0.638,100.01,100.01,471849,4218.60,1.7018,3804.70,26571.10,no
+2026-11-01T14:27:00,c622f09,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V4 lock-free (racy load+store),4,0.100,10,11000,3782685,102085,1.948,0.487,100.02,100.02,659601,25992.30,6.8703,25416.60,177287.20,no
+2026-11-01T14:27:00,c622f09,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V4 lock-free (racy load+store),8,0.100,10,11000,5477709,72628,2.821,0.353,100.02,100.05,894132,94712.40,17.2863,50382.10,351342.70,no

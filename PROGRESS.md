@@ -14,7 +14,7 @@ Project: Adaptive Virtual Loss for Lock-Free Parallel MCTS (our adaptive formula
 
 ## Next
 - Step 4 (built; race-demo and test-locked PASS; 20-game strength run for T=2,4 done): V3 shared tree with spin locks (uct_tree_locked.hpp, spinlock.hpp), race_demo.cpp, test_locked.cpp (speed + lock contention), strength_v3.cpp (V3 vs V0 equal time / equal playouts), arena.hpp play_match. Run: `make race-demo`, `make test-locked`, `make strength-v3 ARGS="20"` first, then the full 100 games.
-- Step 5 (code written, waiting for user to build and run): V4 lock-free (uct_tree_lockfree.hpp; exact fetch_add mode and racy load+store mode), team.hpp (OpenMP or std::thread launcher; V3 now uses it), test_lockfree.cpp (V0/V3/V4 speed in one run), tsan_check.cpp. Run: `make test-lockfree`, `make tsan-control`, `make tsan`.
+- Step 5 (done: test-lockfree PASS; TSan control reported the planted race (2 warnings, so the tool works here with setarch -R); TSan on V3, V4 exact and V4 racy reported no warnings, 4 threads x 20000 iterations each): V4 lock-free (uct_tree_lockfree.hpp; exact fetch_add mode and racy load+store mode), team.hpp (OpenMP or std::thread launcher; V3 now uses it), test_lockfree.cpp (V0/V3/V4 speed in one run), tsan_check.cpp. Run: `make test-lockfree`, `make tsan-control`, `make tsan`.
 - Step 6: fixed virtual loss, then V5 adaptive.
 
 ## Results so far
@@ -31,6 +31,9 @@ Project: Adaptive Virtual Loss for Lock-Free Parallel MCTS (our adaptive formula
 - Step 4 V3 speed (0.1 s, 10 repeats, playouts/sec): V0 2.08M; V3 T=1 1.85M (0.89x V0), T=2 1.80M, T=4 1.87M, T=8 1.50M (0.72x V0). V3 gives NO speedup on this machine. Lock acquisitions ~15-16 per iteration; contended: 4.6% (T=2), 14.9% (T=4), 25.2% (T=8).
 - Step 4 strength (20 games per match only, so CIs about +/-20 points): V3 vs V0 equal time: T=2 57.5% [36.4, 76.2], T=4 52.5% [32.0, 72.1]; equal playouts (V0 0.09 s): T=2 52.5%, T=4 62.5% [40.9, 80.0]. All consistent with 50%. The 8-thread match and the full 100-game runs are NOT done; do them in the Step 7 harness.
 - Finding to report honestly: lock-based shared tree does not scale here (cheap ~0.17 us playouts, so tree/lock work dominates). Hypothesis (untested): cache-line bouncing on hot locks; V4 lock-free should reduce it.
+- Step 5 correctness: V4 exact 0 lost updates (8 threads x 200000 iterations, also with a 4096-node pool); tactics 10/10 x4. V4 racy lost 14775-17984 root-level visits per 100000 iterations at 8 threads (5 runs).
+- Step 5 speed (0.1 s, 10 repeats, playouts/sec; V0 = 2.05M): V3 locks T=1/2/4/8: 1.90M / 1.84M / 1.83M / 1.80M (0.88x V0 at T=8; an earlier run gave 1.50M at T=8, so cross-run variation exceeds the within-run std). V4 atomic add: 1.80M / 2.30M / 3.29M / 4.05M (2.26x own, 1.98x V0 at T=8, efficiency 0.28). V4 racy: 1.94M / 2.48M / 3.78M / 5.48M (2.82x own, 2.68x V0 at T=8).
+- Step 5 V4 bookkeeping at T=8 (per 0.1 s search): exact mode 32.7k failed expansions (about 8% of iterations), 228k wasted nodes (34% of the 662k slots counted in 'tree nodes'; useful tree about 434k nodes for about 405k iterations, versus V0 428k nodes for about 205k iterations, so the tree grows slower per playout = duplicated work). Racy mode lost 17.3% of iterations' root visits at T=8 (6.9% at T=4, 1.7% at T=2): NOT rare at 8 threads; whether it hurts strength is untested.
 
 ## Notes
 - User runs all builds/commands and pastes output; Claude edits code and gives instructions.

@@ -52,11 +52,14 @@ test-lockfree: $(BUILD_DIR)/test_lockfree
 $(BUILD_DIR)/tsan_check: $(SRC_DIR)/tsan_check.cpp $(HEADERS) | $(BUILD_DIR)
 	$(CXX) -O1 -g -std=c++17 -pthread -fsanitize=thread -DMCTS_STD_THREADS -Wall -Wextra $< -o $@
 
+# setarch -R switches address-space randomisation off for this one process.
+# Without it, ThreadSanitizer can stop with "unexpected memory mapping" on
+# kernels that randomise memory addresses with 32 bits of entropy (as WSL2 does).
 tsan: $(BUILD_DIR)/tsan_check
-	./$(BUILD_DIR)/tsan_check
+	setarch $$(uname -m) -R ./$(BUILD_DIR)/tsan_check
 
 tsan-control: $(BUILD_DIR)/tsan_check
-	./$(BUILD_DIR)/tsan_check control
+	setarch $$(uname -m) -R ./$(BUILD_DIR)/tsan_check control
 
 clean:
 	rm -rf $(BUILD_DIR)
