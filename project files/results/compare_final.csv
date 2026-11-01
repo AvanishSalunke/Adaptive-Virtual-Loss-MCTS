@@ -1,3 +1,4 @@
 timestamp,git_commit,cpu_model,logical_cpus,ram_mb,compiler,mode,pairing,games,wins,draws,losses,win_rate,ci95_low,ci95_high,time_per_move_s,threads,opening_seed
 2026-11-01T17:40:19,fcd00f9,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,final,V5 adaptive (lambda=0.5) vs V4 + fixed (v=5),20,6,2,12,0.3500,0.1812,0.5671,0.100,8,1
 2026-11-01T17:40:19,fcd00f9,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,final,V5 adaptive (lambda=0.5) vs V0,20,12,5,3,0.7250,0.5059,0.8716,0.100,8,1
+2026-11-01T17:49:03,718a566,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,V5 adaptive (lambda=0.5) vs V4 fixed (v=5),20,7,1,12,0.3750,0.1998,0.5905,0.100,8,1

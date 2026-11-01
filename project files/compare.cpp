@@ -6,12 +6,13 @@
 // Both players are the same parallel search tree with the same number of
 // threads and the same wall-clock time per move (0.1 s); the only difference
 // is the virtual-loss rule:
-//   V5  adaptive: penalty v = max(1, round(lambda * T / sqrt(n + 1)))
-//   V4  fixed:    the same penalty v everywhere
+//   adaptive: penalty v = max(1, round(lambda * T / sqrt(n + 1)))
+//   fixed:    the same penalty v everywhere
 // Colours alternate, and every pair of games shares a random opening, so
-// neither side gets a lucky start. The program prints V5's win rate with a 95%
-// confidence interval and says whether the two can be told apart.
-// Run it from this folder; the row is also appended to results/compare_final.csv.
+// neither side gets a lucky start. The program prints one small table with
+// both versions' results, and says whether the two can be told apart.
+// Run it from this folder; the result is also appended to results/compare_final.csv
+// together with the machine and the code version.
 
 #include <cstdint>
 #include <cstdio>
@@ -56,35 +57,31 @@ int main(int argc, char** argv) {
     if (games < 2) games = 2;
     if (games % 2 != 0) ++games;  // colours must balance
 
-    const RunInfo info = collect_run_info();
-    std::printf("Machine: %s | %d logical CPUs | %ld MB RAM\n", info.cpu_model.c_str(), info.logical_cpus,
-                info.ram_mb);
-    std::printf("Compiler: %s | git commit: %s\n\n", info.compiler.c_str(), info.git_commit.c_str());
-
-    const std::string pairing = "V5 adaptive (lambda=" + fmt(lambda, 1) + ") vs V4 fixed (v=" +
-                                std::to_string(fixed_v) + ")";
-    std::printf("Settings: game=Connect-4 6x7, %d threads each, %d games (colours alternate, %d random opening "
-                "plies shared by each pair), time per move=%.2f s, opening seed=%llu\n\n",
-                threads, games, kOpeningPlies, kBudget, static_cast<unsigned long long>(kOpeningSeed));
-
-    const MoveFn<Connect4> v5 = make_player(threads, 900, VirtualLoss::Adaptive(lambda));
-    const MoveFn<Connect4> v4 = make_player(threads, 901, VirtualLoss::Fixed(fixed_v));
-    const MatchResult m = play_match<Connect4>(v5, v4, games, kOpeningPlies, kOpeningSeed, "playing");
+    const MoveFn<Connect4> adaptive = make_player(threads, 900, VirtualLoss::Adaptive(lambda));
+    const MoveFn<Connect4> fixed = make_player(threads, 901, VirtualLoss::Fixed(fixed_v));
+    const MatchResult m = play_match<Connect4>(adaptive, fixed, games, kOpeningPlies, kOpeningSeed, "playing");
 
     double lo = 0.0, hi = 1.0;
     wilson_ci95(m.score(), m.games(), lo, hi);
-    std::printf("| Pairing | Games | Wins | Draws | Losses | Win rate | 95%% CI | Time per move | Threads |\n");
-    std::printf("|---------|-------|------|-------|--------|----------|--------|---------------|---------|\n");
-    std::printf("| %-44s | %5d | %4d | %5d | %6d | %7.1f%% | %5.1f%% - %5.1f%% | %9.2f s | %7d |\n",
-                pairing.c_str(), m.games(), m.wins, m.draws, m.losses, 100.0 * m.score(), 100.0 * lo,
-                100.0 * hi, kBudget, threads);
-    std::printf("\n(Win rate is V5's: (wins + 0.5 * draws) / games.)\n");
 
-    if (lo > 0.5) std::printf("Result: the interval is above 50%%, so adaptive virtual loss is better in this test.\n");
-    else if (hi < 0.5) std::printf("Result: the interval is below 50%%, so adaptive virtual loss is worse in this test.\n");
-    else std::printf("Result: the interval contains 50%%, so no difference between adaptive and fixed can be "
-                     "detected at this number of games.\n");
+    std::printf("Adaptive vs fixed virtual loss, Connect-4: %d threads each, %.1f s per move, %d games\n\n",
+                threads, kBudget, m.games());
+    std::printf("| Version                          | Wins | Draws | Losses | Win rate | 95%% interval   |\n");
+    std::printf("|----------------------------------|------|-------|--------|----------|----------------|\n");
+    std::printf("| Adaptive virtual loss (lambda=%.1f) | %4d | %5d | %6d | %7.1f%% | %5.1f%% - %5.1f%% |\n",
+                lambda, m.wins, m.draws, m.losses, 100.0 * m.score(), 100.0 * lo, 100.0 * hi);
+    std::printf("| Fixed virtual loss (v=%-2d)         | %4d | %5d | %6d | %7.1f%% | %5.1f%% - %5.1f%% |\n",
+                fixed_v, m.losses, m.draws, m.wins, 100.0 * (1.0 - m.score()), 100.0 * (1.0 - hi),
+                100.0 * (1.0 - lo));
+    std::printf("\n(Win rate = (wins + 0.5 * draws) / games. The two rows are the same games seen from each side.)\n");
 
+    if (lo > 0.5) std::printf("Result: adaptive is better than fixed in this test (its interval is above 50%%).\n");
+    else if (hi < 0.5) std::printf("Result: adaptive is worse than fixed in this test (its interval is below 50%%).\n");
+    else std::printf("Result: no difference between adaptive and fixed can be detected at this number of games "
+                     "(the interval contains 50%%).\n");
+
+    const RunInfo info = collect_run_info();
+    const std::string pairing = "adaptive (lambda=" + fmt(lambda, 1) + ") vs fixed (v=" + std::to_string(fixed_v) + ")";
     append_csv("results/compare_final.csv", info,
                {"pairing", "games", "wins", "draws", "losses", "win_rate", "ci95_low", "ci95_high",
                 "time_per_move_s", "threads", "opening_seed"},
