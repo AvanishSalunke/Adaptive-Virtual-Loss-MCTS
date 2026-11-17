@@ -33,7 +33,7 @@ all: $(BUILD_DIR)/test_connect4 $(BUILD_DIR)/test_uct $(BUILD_DIR)/compare $(BUI
 
 experiments: $(BUILD_DIR)/hello_threads $(BUILD_DIR)/race_demo $(BUILD_DIR)/test_parallel \
              $(BUILD_DIR)/test_locked $(BUILD_DIR)/test_lockfree $(BUILD_DIR)/test_virtual_loss \
-             $(BUILD_DIR)/strength_v3
+             $(BUILD_DIR)/strength_v3 $(BUILD_DIR)/vl_effect
 
 # Pattern rule: build/<name> is compiled from <name>.cpp, and a change to any
 # header rebuilds it.
@@ -97,6 +97,14 @@ test-virtual-loss: $(BUILD_DIR)/test_virtual_loss
 strength-v3: $(BUILD_DIR)/strength_v3
 	./$(BUILD_DIR)/strength_v3 $(ARGS)
 
+# Does virtual loss help? Plain parallel search against fixed and adaptive virtual loss.
+# Settings: 8 threads, lambda = 0.5, fixed v = 5.
+vl-effect: $(BUILD_DIR)/vl_effect
+	./$(BUILD_DIR)/vl_effect 8 20 0.5 5
+
+vl-effect-full: $(BUILD_DIR)/vl_effect
+	./$(BUILD_DIR)/vl_effect 8 400 0.5 5
+
 # ThreadSanitizer build: std::thread instead of OpenMP, no optimisation tricks.
 $(BUILD_DIR)/tsan_check: tsan_check.cpp $(HEADERS) | $(BUILD_DIR)
 	$(CXX) -O1 -g -std=c++17 -pthread -fsanitize=thread -DMCTS_STD_THREADS -Wall -Wextra $(INCLUDES) $< -o $@
@@ -113,4 +121,4 @@ tsan-control: $(BUILD_DIR)/tsan_check
 clean:
 	rm -rf $(BUILD_DIR)
 
-.PHONY: all experiments test-connect4 test-uct compare-tune compare-final planner-demo planner-tune planner-final run-hello test-parallel race-demo test-locked test-lockfree test-virtual-loss strength-v3 tsan tsan-control clean
+.PHONY: all experiments test-connect4 test-uct compare-tune compare-final planner-demo planner-tune planner-final run-hello test-parallel race-demo test-locked test-lockfree test-virtual-loss strength-v3 vl-effect vl-effect-full tsan tsan-control clean

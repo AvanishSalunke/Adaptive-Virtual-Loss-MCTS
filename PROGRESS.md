@@ -10,6 +10,9 @@ Project: Adaptive Virtual Loss for Lock-Free Parallel MCTS (our adaptive formula
 - `project files/`: a self-contained COPY of everything needed to run the final adaptive virtual loss comparison on Connect-4 (compare.cpp, game/, search/, support/, Makefile, README.txt, saved results). Run `make` then `make run` inside it: it plays ONLY V5 adaptive vs V4 fixed (20 games, about a minute; `make run-full` = 400 games, about 15 minutes). Its compare.cpp is a trimmed version of src/benchmarks/compare.cpp. It is a snapshot: the master code is in src/. Not compile-tested yet (user asked not to run anything); all #include targets were checked to exist.
 - Known open item: the graph planner's final comparison was not re-run after fixing the fixed-point reward bug in uct_tree_lockfree.hpp (planner_final.csv does not exist); do not quote planner comparison numbers. Connect-4 results are unaffected by that bug.
 
+## Virtual loss vs plain parallel (new, not run yet)
+- `src/experiments/vl_effect.cpp`: plays fixed virtual loss and adaptive virtual loss each against PLAIN parallel search (no virtual loss), 8 threads, 0.1 s/move. Prints one table with win rate, edge vs plain, 95% interval and a verdict per row; the deciding factor is the lower end of the 95% interval (above 50% = better). Run from the repo root: `make vl-effect` (20 games per match, about 1.5 minutes) or `make vl-effect-full` (400 games per match, about 30 minutes). Rows go to results/vl_effect.csv. Written without compiling (user asked not to run anything).
+
 ## Source layout (src/)
 - util/        timing.hpp, rng.hpp, stats.hpp, run_info.hpp, csv_log.hpp
 - parallel/    team.hpp (OpenMP or std::thread launcher)
