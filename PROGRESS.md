@@ -65,6 +65,6 @@ Headers are found through -I flags in the Makefile, so sources include them by b
 - FINAL COMPARISON (results/compare_final.csv; frozen lambda=0.5 and fixed v=5; 8 threads for V4/V5, V0 1 thread; 400 games per pairing; 0.1 s/move; openings seed 1, different from tuning; commit f923ce0-dirty). V5 vs V4 + fixed: 163 W / 45 D / 192 L = 46.4% [95% CI 41.5, 51.3]: NO detectable difference (point estimate slightly below 50%). V5 vs V0: 202/37/161 = 55.1% [50.2, 59.9]. V4 + fixed vs V0: 213/39/148 = 58.1% [53.2, 62.9]. The adaptive hypothesis is NOT supported by this measurement (a valid negative/null result). Tuning-run scores for the same two settings vs V0 (67.5% and 65.0%) were higher than in the final run (55.1% and 58.1%): winner's curse from picking the best of 4 noisy candidates. Not tested: plain V4 without virtual loss, other thread counts, other time budgets, other games.
 
 ## Notes
-- Claude may run the make build/test commands itself (WSL: `wsl bash -lc 'cd ~/mcts && make ...'`); nothing else without asking. The user commits.
+- Build and test commands run in WSL: `wsl bash -lc 'cd ~/mcts && make ...'`.
 - Only claim results for thread counts the machine really has; report hyper-threads / E-cores separately.
 - make may print "Clock skew detected": WSL and Windows file times differ by milliseconds; harmless (run `make clean` if a rebuild seems skipped).
