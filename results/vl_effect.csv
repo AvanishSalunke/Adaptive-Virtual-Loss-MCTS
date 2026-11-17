@@ -1,0 +1,5 @@
+timestamp,git_commit,cpu_model,logical_cpus,ram_mb,compiler,version,opponent,games,wins,draws,losses,win_rate,edge_points,ci95_low,ci95_high,verdict,time_per_move_s,threads,opening_seed
+2026-11-17T01:22:27,c9e32d2,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,Fixed virtual loss (v=5),plain parallel,20,8,6,6,0.5500,5.00,0.3421,0.7418,no detectable difference,0.100,8,1
+2026-11-17T01:22:27,c9e32d2,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,Adaptive virtual loss (lambda=0.5),plain parallel,20,11,3,6,0.6250,12.50,0.4095,0.8002,no detectable difference,0.100,8,1
+2026-11-17T02:05:17,c9e32d2-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,Fixed virtual loss (v=5),plain parallel,400,195,48,157,0.5475,4.75,0.4985,0.5956,no detectable difference,0.100,8,1
+2026-11-17T02:05:17,c9e32d2-dirty,Intel(R) Core(TM) Ultra 5 125H,18,7725,g++ 13.3.0,Adaptive virtual loss (lambda=0.5),plain parallel,400,202,33,165,0.5463,4.63,0.4973,0.5944,no detectable difference,0.100,8,1

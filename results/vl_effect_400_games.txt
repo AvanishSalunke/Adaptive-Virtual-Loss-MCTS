@@ -1,0 +1,20 @@
+./build/vl_effect 8 400 0.5 5
+Does virtual loss help? Parallel search with and without virtual loss, Connect-4
+8 threads each, 0.1 s per move, 400 games per match, colours alternate, openings shared by each pair of games.
+Each version below plays the PLAIN parallel search (the same search with no virtual loss).
+
+| Version (plays the plain parallel search) | Wins | Draws | Losses | Win rate | Edge vs plain | 95% interval    | Verdict                    |
+|-------------------------------------------|------|-------|--------|----------|---------------|-----------------|----------------------------|
+| Fixed virtual loss (v=5)                  |  195 |    48 |    157 |    54.8% |      +4.7 pts |  49.9% -  59.6% | no detectable difference   |
+| Adaptive virtual loss (lambda=0.5)        |  202 |    33 |    165 |    54.6% |      +4.6 pts |  49.7% -  59.4% | no detectable difference   |
+
+How to read the table
+  Win rate = (wins + 0.5 x draws) / games for the version in that row; plain parallel gets the rest.
+  Edge vs plain = win rate minus 50%: how far ahead (+) or behind (-) plain parallel search.
+  DECIDING FACTOR = the LOWER END of the 95% interval:
+      lower end above 50%        -> BETTER than plain parallel
+      interval contains 50%      -> no detectable difference
+      upper end below 50%        -> WORSE than plain parallel
+
+Conclusion: neither virtual-loss version can be told apart from plain parallel search at this number of games.
+(To compare adaptive with fixed directly, use the head-to-head comparison in 'project files'.)
